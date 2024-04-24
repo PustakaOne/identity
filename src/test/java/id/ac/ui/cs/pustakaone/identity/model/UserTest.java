@@ -10,8 +10,8 @@ public class UserTest {
     User user = new User("John Doe", "john@example.com", "1234567890", "password");
 
     @Test
-    void getterNama() {
-        assertEquals("John Doe", user.getNama());
+    void getterName() {
+        assertEquals("John Doe", user.getName());
     }
 
     @Test
@@ -50,9 +50,9 @@ public class UserTest {
     }
 
     @Test
-    void setterNama() {
-        user.setNama("Jane Doe");
-        assertEquals("Jane Doe", user.getNama());
+    void setterName() {
+        user.setName("Jane Doe");
+        assertEquals("Jane Doe", user.getName());
     }
 
     @Test
@@ -96,5 +96,20 @@ public class UserTest {
     void setterBio() {
         user.setBio("A simple person");
         assertEquals("A simple person", user.getBio());
+    }
+
+    @Test
+    void implementUserDetail() {
+        User user = new User("Jane Doe", "jane@example.com", "0987654321", "newpassword");
+        user.setIsAdmin(true);
+        assertEquals(true, user.isAccountNonExpired());
+        assertEquals(true, user.isAccountNonLocked());
+        assertEquals(true, user.isCredentialsNonExpired());
+        assertEquals(true, user.isEnabled());
+        assertEquals(true, user.getIsAdmin());
+        assertEquals(null, user.getFoto());
+        assertEquals(null, user.getBio());
+        assertEquals(null, user.getJenisKelamin());
+        assertEquals(null, user.getTanggalLahir());
     }
 }
