@@ -18,7 +18,7 @@ public class RegisterRequest {
     private String password;
     private String username;
     private String noTelp;
-    private byte[] foto;
+    private String foto;
     private String jenisKelamin;
     private LocalDate tanggalLahir;
     private String bio;
