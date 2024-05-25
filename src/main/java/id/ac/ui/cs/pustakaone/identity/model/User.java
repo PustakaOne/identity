@@ -51,8 +51,7 @@ public class User implements UserDetails {
     @Column(name = "no_telp", unique = true)
     private String noTelp;
 
-    @Lob
-    private byte[] foto;
+    private String foto;
 
     @Column(name = "jenis_kelamin")
     private String jenisKelamin;
