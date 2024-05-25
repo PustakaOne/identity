@@ -18,7 +18,7 @@
 //
 //}
 
-package id.ac.ui.cs.advprog.b10.petdaycare.auth;
+package id.ac.ui.cs.pustakaone.identity;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
