@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import id.ac.ui.cs.pustakaone.identity.enums.EnumRole;
+import id.ac.ui.cs.pustakaone.identity.enums.EnumJenisKelamin;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -75,7 +78,30 @@ public class User implements UserDetails {
         }
     }
 
+    public void setJenisKelamin(String jenisKelamin) throws IllegalArgumentException {
+        if (jenisKelamin == null) {
+            throw new IllegalArgumentException("Gender is Empty");
+        }
 
+        if (!EnumJenisKelamin.contains(jenisKelamin)) {
+            throw new IllegalArgumentException("Gender is not valid");
+        }
+
+        this.jenisKelamin = jenisKelamin;
+    }
+
+    public void setRole(String role) throws IllegalArgumentException {
+
+        if (role == null) {
+            throw new IllegalArgumentException("Role is Empty");
+        }
+
+        if (!EnumRole.contains(role)) {
+            throw new IllegalArgumentException("Role is not valid");
+        }
+
+        this.role = role;
+    }
     @Override
     public String getPassword() {
         return this.password;
