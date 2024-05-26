@@ -26,7 +26,7 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserDetailsResponse> getDetails() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.getCurrentUser();
         return ResponseEntity.ok(
                 UserDetailsResponse
                         .builder()
