@@ -1,22 +1,22 @@
 package id.ac.ui.cs.pustakaone.identity.controller;
 
 import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationRequest;
-import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationResponse;
 import id.ac.ui.cs.pustakaone.identity.dto.RegisterRequest;
+import id.ac.ui.cs.pustakaone.identity.model.User;
 import id.ac.ui.cs.pustakaone.identity.service.AuthenticationService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-public class AuthenticationControllerTest {
+class AuthenticationControllerTest {
 
     @Mock
     private AuthenticationService authenticationService;
@@ -24,39 +24,48 @@ public class AuthenticationControllerTest {
     @InjectMocks
     private AuthenticationController authenticationController;
 
-    @Test
-    public void testRegister() {
-        // Mock data
-        RegisterRequest registerRequest = RegisterRequest.builder()
-                .fullName("John Doe")
-                .email("john.doe@example.com")
-                .password("password")
-                .build();
+    private RegisterRequest registerRequest;
+    private AuthenticationRequest authenticationRequest;
+    private User user;
 
-        // Stubbing
-        when(authenticationService.register(registerRequest)).thenReturn(new AuthenticationResponse("jwtToken"));
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-        // Call the method
-        ResponseEntity<AuthenticationResponse> responseEntity = authenticationController.register(registerRequest);
+        registerRequest = new RegisterRequest();
 
-        // Verify the result
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("jwtToken", responseEntity.getBody().getToken());
+        authenticationRequest = new AuthenticationRequest();
+
+        user = new User();
     }
 
     @Test
-    public void testAuthenticate() {
-        // Mock data
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest("john.doe@example.com", "password");
+    void testRegister() {
+        when(authenticationService.register(any(RegisterRequest.class))).thenReturn(user);
 
-        // Stubbing
-        when(authenticationService.authenticate(authenticationRequest)).thenReturn(new AuthenticationResponse("jwtToken"));
+        ResponseEntity<User> responseEntity = authenticationController.register(registerRequest);
 
-        // Call the method
-        ResponseEntity<AuthenticationResponse> responseEntity = authenticationController.authenticate(authenticationRequest);
-
-        // Verify the result
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("jwtToken", responseEntity.getBody().getToken());
+        assertEquals(user, responseEntity.getBody());
+    }
+
+    @Test
+    void testAuthenticate() {
+        when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(user);
+
+        ResponseEntity<User> responseEntity = authenticationController.authenticate(authenticationRequest);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(user, responseEntity.getBody());
+    }
+
+    @Test
+    void testGetDetails() {
+        when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(user);
+
+        ResponseEntity<User> responseEntity = authenticationController.getDetails(authenticationRequest);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(user, responseEntity.getBody());
     }
 }

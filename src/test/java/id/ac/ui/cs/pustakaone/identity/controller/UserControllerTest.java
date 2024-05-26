@@ -46,20 +46,16 @@ class UserControllerTest {
         user.setBio("Bio");
         user.setGender("Male");
 
-        // Convert String to Date
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date birthDate = dateFormat.parse("1990-01-01");
         user.setBirthDate(birthDate);
 
-        // Convert String to Enum Role
         user.setRole(id.ac.ui.cs.pustakaone.identity.Enum.Role.valueOf("USER"));
 
         when(userService.getCurrentUser()).thenReturn(user);
 
-        // Act
         ResponseEntity<UserDetailsResponse> response = userController.getDetails();
 
-        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         UserDetailsResponse userDetails = response.getBody();

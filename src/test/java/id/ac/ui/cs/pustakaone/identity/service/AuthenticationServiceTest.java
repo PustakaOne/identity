@@ -2,26 +2,26 @@ package id.ac.ui.cs.pustakaone.identity.service;
 
 import id.ac.ui.cs.pustakaone.identity.Enum.Role;
 import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationRequest;
-import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationResponse;
 import id.ac.ui.cs.pustakaone.identity.dto.RegisterRequest;
 import id.ac.ui.cs.pustakaone.identity.model.User;
 import id.ac.ui.cs.pustakaone.identity.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceTest {
+class AuthenticationServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -29,8 +29,6 @@ public class AuthenticationServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private JwtService jwtService;
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -38,52 +36,58 @@ public class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
-    @Test
-    public void testRegister() {
-        // Mock data
-        RegisterRequest registerRequest = new RegisterRequest("John Doe", "john.doe@example.com", "password", "1234567890", null, null, "Male", null);
-        User user = User.builder()
-                .fullName(registerRequest.getFullName())
-                .email(registerRequest.getEmail())
-                .password("encodedPassword")
-                .phoneNumber(registerRequest.getPhoneNumber())
+    private RegisterRequest registerRequest;
+    private AuthenticationRequest authenticationRequest;
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        registerRequest = new RegisterRequest();
+        registerRequest.setFullName("John Doe");
+        registerRequest.setEmail("johndoe@example.com");
+        registerRequest.setBio("Bio");
+        registerRequest.setPassword("password");
+        registerRequest.setGender("Male");
+        registerRequest.setPhotoUrl("http://example.com/photo.jpg");
+        registerRequest.setBirthDate(new Date()); // Menggunakan objek Date
+        registerRequest.setPhoneNumber("123456789");
+
+        authenticationRequest = new AuthenticationRequest();
+        authenticationRequest.setEmail("johndoe@example.com");
+        authenticationRequest.setPassword("password");
+
+        user = User.builder()
+                .fullName("John Doe")
+                .email("johndoe@example.com")
+                .bio("Bio")
+                .password("encoded_password")
+                .gender("Male")
+                .photoUrl("http://example.com/photo.jpg")
+                .birthDate(new Date()) // Menggunakan objek Date
+                .phoneNumber("123456789")
                 .role(Role.USER)
                 .build();
-
-        // Stubbing
-        when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(jwtService.generateToken(any(User.class))).thenReturn("jwtToken");
-
-        // Call the method
-        AuthenticationResponse response = authenticationService.register(registerRequest);
-
-        // Verify the result
-        assertEquals("jwtToken", response.getToken());
-        verify(userRepository, times(1)).save(any(User.class));
     }
 
+    @Test
+    void testRegister() {
+        when(passwordEncoder.encode(any(String.class))).thenReturn("encoded_password");
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        User registeredUser = authenticationService.register(registerRequest);
+
+        assertEquals(user, registeredUser);
+    }
 
     @Test
-    public void testAuthenticate() {
-        // Mock data
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest("john.doe@example.com", "password");
-        User user = User.builder()
-                .fullName("John Doe")
-                .email(authenticationRequest.getEmail())
-                .password("encodedPassword")
-                .phoneNumber("1234567890")
-                .role(Role.USER)
-                .build();
+    void testAuthenticate() {
+        when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
 
-        // Stubbing
-        when(userRepository.findByEmail(authenticationRequest.getEmail())).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user)).thenReturn("jwtToken");
+        User authenticatedUser = authenticationService.authenticate(authenticationRequest);
 
-        // Call the method
-        AuthenticationResponse response = authenticationService.authenticate(authenticationRequest);
-
-        // Verify the result
-        assertEquals("jwtToken", response.getToken());
+        assertEquals(user, authenticatedUser);
     }
 }
