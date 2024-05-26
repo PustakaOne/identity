@@ -58,9 +58,7 @@ tasks.test {
 tasks.jacocoTestReport {
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: ['**/*Application**',
-										'id/ac/ui/cs/pustakaone/identity/dto/**',
-										'id/ac/ui/cs/pustakaone/identity/configure/**'])
+			fileTree(dir: it, exclude: ['**/*Application**'])
 		}))
 	}
 	dependsOn(tasks.test)
