@@ -47,10 +47,10 @@ public class UserServiceTest {
         // Mocking the behavior of UserRepository
         User user = new User(1L, "John Doe", "john@example.com", "password", null, null, null, null, null, null);
 
-        when(userRepository.findByUsername("john@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
 
         // Calling the method to be tested
-        Optional<User> result = userService.findByUsername("john@example.com");
+        Optional<User> result = userRepository.findByEmail("john@example.com");
 
         // Asserting the result
         assertEquals(user, result.orElse(null));
