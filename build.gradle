@@ -18,6 +18,7 @@ sonar {
 		property "sonar.projectKey", "PustakaOne_identity"
 		property "sonar.organization", "pustakaone"
 		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.login", "your_sonar_token" // Tambahkan token autentikasi Anda di sini
 	}
 }
 
@@ -58,7 +59,11 @@ tasks.test {
 tasks.jacocoTestReport {
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: ['**/*Application**'])
+			fileTree(dir: it, exclude: [
+					'id/ac/ui/cs/pustakaone/identity/dto/**',
+					'id/ac/ui/cs/pustakaone/identity/configure/**',
+					'**/*Application**'
+			])
 		}))
 	}
 	dependsOn(tasks.test)
@@ -66,5 +71,15 @@ tasks.jacocoTestReport {
 		xml.required.set(true)
 		csv.required.set(true)
 		html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+	}
+}
+
+tasks.named('sonarqube') {
+	doFirst {
+		if (project.hasProperty('sonar.login')) {
+			logger.lifecycle("Running SonarQube analysis with login token.")
+		} else {
+			throw new GradleException("Property 'sonar.login' is required to run SonarQube analysis.")
+		}
 	}
 }
