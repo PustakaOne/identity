@@ -1,6 +1,5 @@
 package id.ac.ui.cs.pustakaone.identity.dto;
 
-import id.ac.ui.cs.pustakaone.identity.dto.RegisterRequest;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
