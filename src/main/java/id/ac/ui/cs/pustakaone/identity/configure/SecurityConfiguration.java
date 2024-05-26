@@ -26,6 +26,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests((authorizeHttpRequest) -> {
                     authorizeHttpRequest
                             .requestMatchers("/auth/**").permitAll()
+                            .requestMatchers("/user/profiles").permitAll()
                             .anyRequest().authenticated();
                 })
                 .sessionManagement((sessionManagement) -> {
