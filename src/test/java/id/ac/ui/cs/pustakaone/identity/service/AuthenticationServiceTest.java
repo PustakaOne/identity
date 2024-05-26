@@ -6,14 +6,12 @@ import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationResponse;
 import id.ac.ui.cs.pustakaone.identity.dto.RegisterRequest;
 import id.ac.ui.cs.pustakaone.identity.model.User;
 import id.ac.ui.cs.pustakaone.identity.repository.UserRepository;
-import id.ac.ui.cs.pustakaone.identity.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -64,6 +62,7 @@ public class AuthenticationServiceTest {
         assertEquals("jwtToken", response.getToken());
         verify(userRepository, times(1)).save(any(User.class));
     }
+
 
     @Test
     public void testAuthenticate() {
