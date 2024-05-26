@@ -1,18 +1,10 @@
 package id.ac.ui.cs.pustakaone.identity.service;
 
-import id.ac.ui.cs.pustakaone.identity.core.AuthManager;
-import id.ac.ui.cs.pustakaone.identity.dto.AuthTransactionDto;
+import id.ac.ui.cs.pustakaone.identity.Enum.Role;
 import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationRequest;
 import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationResponse;
 import id.ac.ui.cs.pustakaone.identity.dto.RegisterRequest;
-import id.ac.ui.cs.pustakaone.identity.exceptions.*;
-import id.ac.ui.cs.pustakaone.identity.factory.AdminFactory;
-import id.ac.ui.cs.pustakaone.identity.factory.CustomerFactory;
-import id.ac.ui.cs.pustakaone.identity.factory.FactoryUser;
-import id.ac.ui.cs.pustakaone.identity.model.Token;
-import id.ac.ui.cs.pustakaone.identity.model.TokenType;
 import id.ac.ui.cs.pustakaone.identity.model.User;
-import id.ac.ui.cs.pustakaone.identity.repository.TokenRepository;
 import id.ac.ui.cs.pustakaone.identity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,135 +12,46 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
-import java.util.Objects;
-
-
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
+
     private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtService jwtService;
-
-    private final AuthManager authManager = AuthManager.getInstance();
-
     private final AuthenticationManager authenticationManager;
 
-    private FactoryUser factoryUser;
-
-    public User register(RegisterRequest request) {
-        var checkUser = userRepository.findByEmail(request.getEmail()).orElse(null);
-
-        if(checkUser != null) {
-            throw new UserAlreadyExistException();
-        }
-
-        checkUser = userRepository.findByUsername(request.getUsername()).orElse(null);
-        if(checkUser != null) {
-            throw new UsernameAlreadyExistException();
-        }
-
-        User user;
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        if(Objects.equals(request.getRole(), "USER")){
-            factoryUser = new CustomerFactory();
-        } else if("ADMIN".equals(request.getRole())){
-            factoryUser = new AdminFactory();
-        } else {
-            throw new UserRoleRegisterException();
-        }
-
-        user = factoryUser.createUser(request);
-
-        var savedUser = userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        saveUserToken(savedUser, jwtToken);
-
-        return user;
-
-    }
-
-    private void saveUserToken(User user, String jwtToken) {
-        var token = Token.builder()
-                .user(user)
-                .tokenString(jwtToken)
-                .tokenType(TokenType.BEARER)
-                .expired(false)
-                .revoked(false)
+    public AuthenticationResponse register(RegisterRequest request){
+        var user = User.builder()
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .bio(request.getBio())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .gender(request.getGender())
+                .photoUrl(request.getPhotoUrl())
+                .birthDate(request.getBirthDate())
+                .phoneNumber(request.getPhoneNumber())
+                .role(Role.USER)
                 .build();
-        tokenRepository.save(token);
+        userRepository.save(user);
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        try {
-            var user = userRepository.findByUsername(request.getUsername()).orElseThrow();
-
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    )
-            );
-
-            var jwtToken = jwtService.generateToken(user);
-            authManager.registerNewToken(jwtToken, request.getUsername());
-
-            revokeAllUserTokens(user);
-            saveUserToken(user, jwtToken);
-
-            return AuthenticationResponse.builder().token(jwtToken).build();
-        } catch(UsernameAlreadyLoggedIn e){
-            throw new UsernameAlreadyLoggedIn();
-        } catch(NoSuchElementException e){
-            throw new UsernameDoesNotExist();
-        }
-    }
-
-    private void revokeAllUserTokens(User user){
-        var validUserToken = tokenRepository.findAllValidTokensByUser(user.getId().toString());
-        if (validUserToken.isEmpty()){
-            return;
-        }
-        validUserToken.forEach(t -> {
-            t.setExpired(true);
-            t.setRevoked(true);
-        });
-        tokenRepository.saveAll(validUserToken);
-    }
-
-    public AuthTransactionDto verify(String token){
-        try{
-            var username = authManager.getUsername(token);
-            return AuthTransactionDto.builder()
-                    .idCustomer(Objects.requireNonNull(userRepository.findByUsername(authManager.getUsername(token)).orElse(null)).getId())
-                    .token(token)
-                    .username(username)
-                    .build();
-        } catch (InvalidTokenException e){
-            throw new InvalidTokenException();
-        }
-    }
-
-
-    public void logout(String token){
-        if(authManager.getUsername(token) == null){
-            throw new InvalidTokenException();
-        } else {
-            var storedToken = tokenRepository.findByTokenString(token).orElse(null);
-            if(storedToken != null){
-                storedToken.setExpired(true);
-                storedToken.setRevoked(true);
-                tokenRepository.save(storedToken);
-            }
-
-            authManager.removeToken(token);
-        }
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow();
+        String jwtToken = jwtService.generateToken(user);
+        return new AuthenticationResponse(jwtToken);
     }
 
 }

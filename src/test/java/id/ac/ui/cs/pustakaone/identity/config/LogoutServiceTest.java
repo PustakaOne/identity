@@ -3,9 +3,6 @@ package id.ac.ui.cs.pustakaone.identity.config;
 import static org.mockito.Mockito.*;
 
 import id.ac.ui.cs.pustakaone.identity.core.AuthManager;
-import id.ac.ui.cs.pustakaone.identity.repository.TokenRepository;
-import id.ac.ui.cs.pustakaone.identity.model.Token;
-import id.ac.ui.cs.pustakaone.identity.service.AuthenticationService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

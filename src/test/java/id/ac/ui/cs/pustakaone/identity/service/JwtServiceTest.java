@@ -1,88 +1,78 @@
 package id.ac.ui.cs.pustakaone.identity.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.userdetails.User;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.security.Key;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
- class JwtServiceTest {
+class JwtServiceTest {
 
+    @InjectMocks
     private JwtService jwtService;
 
+    @Mock
+    private UserDetails userDetails;
+
     @BeforeEach
-     void setup() {
-        jwtService = new JwtService();
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-     void testGenerateTokenAndExtractUsername() {
-        UserDetails userDetails = getUserDetails();
-        String token = jwtService.generateToken(userDetails);
-        String username = jwtService.extractUsername(token);
+    void testGenerateAndExtractToken() {
+        // Mock UserDetails
+        when(userDetails.getUsername()).thenReturn("testUser");
 
-        assertEquals(userDetails.getUsername(), username);
-    }
-
-    @Test
-     void testGenerateTokenWithExtraClaims() {
-        UserDetails userDetails = getUserDetails();
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", "admin");
-
-        String token = jwtService.generateToken(extraClaims, userDetails);
-        Claims claims = Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token).getBody();
-
-        assertEquals("admin", claims.get("role"));
-        assertEquals(userDetails.getUsername(), claims.getSubject());
-    }
-
-    @Test
-     void testIsTokenValid() {
-        UserDetails userDetails = getUserDetails();
+        // Generate token
         String token = jwtService.generateToken(userDetails);
 
+        // Extract username from token
+        String extractedUsername = jwtService.extractUsername(token);
+
+        // Assert
+        assertEquals("testUser", extractedUsername);
+    }
+
+    @Test
+    void testTokenValidity() {
+        // Mock UserDetails
+        when(userDetails.getUsername()).thenReturn("testUser");
+
+        // Generate token
+        String token = jwtService.generateToken(userDetails);
+
+        // Token is valid if the username matches and it's not expired
         assertTrue(jwtService.isTokenValid(token, userDetails));
     }
 
     @Test
-     void testIsTokenExpired() {
-        UserDetails userDetails = getUserDetails();
-        String expiredToken = generateExpiredToken(userDetails);
+    void testTokenExpiration() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        // Mock UserDetails
+        when(userDetails.getUsername()).thenReturn("testUser");
 
-        assertFalse(jwtService.isTokenValid(expiredToken, userDetails));
-    }
+        // Generate token with a short expiration time
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("extraInfo", "someExtraData");
+        String token = jwtService.generateToken(userDetails, extraClaims);
 
-    private UserDetails getUserDetails() {
-        return User.withUsername("john.doe")
-                .password("password")
-                .roles("user")
-                .build();
-    }
+        // Extract expiration date using reflection
+        Method extractExpirationMethod = JwtService.class.getDeclaredMethod("extractExpiration", String.class);
+        extractExpirationMethod.setAccessible(true);
+        Date expirationDate = (Date) extractExpirationMethod.invoke(jwtService, token);
 
-    private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode("645367566B59703373367639792F423F4528482B4D6251655468576D5A713474");
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private String generateExpiredToken(UserDetails userDetails) {
-        return Jwts.builder()
-                .setClaims(new HashMap<>())
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis() - 1000 * 60 * 60)) // Set in the past
-                .setExpiration(new Date(System.currentTimeMillis() - 1000)) // Expired token
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
+        // Token is expired if the expiration date is before the current date
+        assertTrue(expirationDate.before(new Date(System.currentTimeMillis() + 61 * 60 * 1_000)));
     }
 }

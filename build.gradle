@@ -24,43 +24,38 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	testImplementation 'org.springframework.security:spring-security-test'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'org.postgresql:postgresql'
-
-	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
-	implementation group: 'com.google.guava', name: 'guava', version: '33.2.0-jre'
-
-
+	testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
+	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 }
 
 tasks.test {
 	useJUnitPlatform()
-	finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+	finalizedBy(tasks.jacocoTestReport)
 }
+
 tasks.jacocoTestReport {
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: ['**/*Application**'])
 		}))
 	}
-	dependsOn(tasks.test) // tests are required to run before generating the report
+	dependsOn(tasks.test)
 	reports {
 		xml.required.set(false)
 		csv.required.set(false)
 		html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
 	}
 }
-

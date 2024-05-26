@@ -1,6 +1,5 @@
 package id.ac.ui.cs.pustakaone.identity.config;
 
-import id.ac.ui.cs.pustakaone.identity.repository.TokenRepository;
 import id.ac.ui.cs.pustakaone.identity.service.JwtService;
 
 import org.junit.jupiter.api.BeforeEach;

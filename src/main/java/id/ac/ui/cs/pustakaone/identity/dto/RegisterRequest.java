@@ -1,12 +1,11 @@
 package id.ac.ui.cs.pustakaone.identity.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 @Builder
@@ -16,13 +15,9 @@ public class RegisterRequest {
     private String fullName;
     private String email;
     private String password;
-    private String username;
-    private String noTelp;
-    private String foto;
-    private String jenisKelamin;
-    private LocalDate tanggalLahir;
+    private String phoneNumber;
+    private String photoUrl;
     private String bio;
-
-    private String role;
-
+    private String gender;
+    private Date birthDate;
 }
