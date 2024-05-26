@@ -7,6 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,35 +29,64 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
-    public void testGetAllUsers() {
-        // Mocking the behavior of UserRepository
-        List<User> userList = new ArrayList<>();
-        userList.add(new User(1L, "John Doe", "john@example.com", "password", null, null, null, null, null, null));
-        userList.add(new User(2L, "Jane Doe", "jane@example.com", "password", null, null, null, null, null, null));
+    public void testGetCurrentUser() {
+        // Mock authentication
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                "test@example.com", "password", new ArrayList<>()
+        );
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        when(userRepository.findAll()).thenReturn(userList);
+        // Mock userRepository
+        User user = new User(1L, "Test User", "test@example.com", "password", null, null, null, null, null, null);
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        // Calling the method to be tested
-        List<User> result = userService.getAllUsers();
+        // Call the method to be tested
+        User result = userService.getCurrentUser();
 
-        // Asserting the result
-        assertEquals(userList.size(), result.size());
-        assertEquals(userList.get(0), result.get(0));
-        assertEquals(userList.get(1), result.get(1));
+        // Verify the result
+        assertEquals(user, result);
     }
 
     @Test
-    public void testFindByUsername() {
-        // Mocking the behavior of UserRepository
-        User user = new User(1L, "John Doe", "john@example.com", "password", null, null, null, null, null, null);
+    public void testGetCurrentUser_NoAuthentication() {
+        // Ensure there's no authentication set
+        SecurityContextHolder.clearContext();
 
-        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
+        // Call the method to be tested
+        User result = userService.getCurrentUser();
 
-        // Calling the method to be tested
-        Optional<User> result = userRepository.findByEmail("john@example.com");
-
-        // Asserting the result
-        assertEquals(user, result.orElse(null));
+        // Verify the result is null
+        assertEquals(null, result);
     }
 
+    @Test
+    public void testGetCurrentUser_AuthenticationPrincipalIsString() {
+        // Mock authentication with principal as string
+        Authentication authentication = new UsernamePasswordAuthenticationToken("anonymous", null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Call the method to be tested
+        User result = userService.getCurrentUser();
+
+        // Verify the result is null
+        assertEquals(null, result);
+    }
+
+    @Test
+    public void testGetAllUsers() {
+        // Mock userRepository
+        List<User> userList = new ArrayList<>();
+        userList.add(new User(1L, "Test User 1", "test1@example.com", "password1", null, null, null, null, null, null));
+        userList.add(new User(2L, "Test User 2", "test2@example.com", "password2", null, null, null, null, null, null));
+        when(userRepository.findAll()).thenReturn(userList);
+
+        // Call the method to be tested
+        List<User> result = userService.getAllUsers();
+
+        // Verify the result
+        assertEquals(userList, result);
+    }
 }
