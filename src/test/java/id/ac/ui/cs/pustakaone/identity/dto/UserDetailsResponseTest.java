@@ -7,17 +7,15 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserDetailsResponseTest {
+class UserDetailsResponseTest {
 
     @Test
-    public void testGetterAndSetter() {
-        // Create a sample date
+    void testGetterAndSetter() {
+
         Date sampleDate = new Date();
 
-        // Create an instance of UserDetailsResponse
         UserDetailsResponse response = new UserDetailsResponse();
 
-        // Set values using setter methods
         response.setId(1L);
         response.setFullName("John Doe");
         response.setEmail("john@example.com");
@@ -29,7 +27,7 @@ public class UserDetailsResponseTest {
         response.setBirthDate(sampleDate);
         response.setRole(Role.ADMIN);
 
-        // Test getter methods
+
         assertEquals(1L, response.getId());
         assertEquals("John Doe", response.getFullName());
         assertEquals("john@example.com", response.getEmail());

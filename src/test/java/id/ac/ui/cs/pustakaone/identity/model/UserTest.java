@@ -7,11 +7,11 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserTest {
+class UserTest {
 
     @Test
-    public void testUserConstructorAndGetters() {
-        // Create a user instance
+    void testUserConstructorAndGetters() {
+
         User user = new User();
         user.setId(1L);
         user.setFullName("John Doe");
@@ -24,7 +24,7 @@ public class UserTest {
         user.setBirthDate(new Date());
         user.setRole(Role.USER);
 
-        // Test user getters
+
         assertEquals(1L, user.getId());
         assertEquals("John Doe", user.getFullName());
         assertEquals("john.doe@example.com", user.getEmail());
@@ -37,12 +37,12 @@ public class UserTest {
     }
 
     @Test
-    public void testUserAuthorities() {
-        // Create a user instance
+    void testUserAuthorities() {
+
         User user = new User();
         user.setRole(Role.USER);
 
-        // Test getAuthorities method
+
         assertEquals(1, user.getAuthorities().size());
         assertEquals("USER", user.getAuthorities().iterator().next().getAuthority());
     }

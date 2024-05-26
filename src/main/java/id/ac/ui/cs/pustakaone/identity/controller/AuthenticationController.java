@@ -1,7 +1,6 @@
 package id.ac.ui.cs.pustakaone.identity.controller;
 
 import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationRequest;
-import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationResponse;
 import id.ac.ui.cs.pustakaone.identity.dto.RegisterRequest;
 import id.ac.ui.cs.pustakaone.identity.model.User;
 import id.ac.ui.cs.pustakaone.identity.service.AuthenticationService;

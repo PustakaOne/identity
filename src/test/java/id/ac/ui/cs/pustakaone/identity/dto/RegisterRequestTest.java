@@ -6,17 +6,15 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RegisterRequestTest {
+class RegisterRequestTest {
 
     @Test
-    public void testGetterAndSetter() {
-        // Create a sample date
+    void testGetterAndSetter() {
+
         Date sampleDate = new Date();
 
-        // Create an instance of RegisterRequest
         RegisterRequest request = new RegisterRequest();
 
-        // Set values using setter methods
         request.setFullName("John Doe");
         request.setEmail("john@example.com");
         request.setPassword("password123");
@@ -26,7 +24,6 @@ public class RegisterRequestTest {
         request.setGender("male");
         request.setBirthDate(sampleDate);
 
-        // Test getter methods
         assertEquals("John Doe", request.getFullName());
         assertEquals("john@example.com", request.getEmail());
         assertEquals("password123", request.getPassword());

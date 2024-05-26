@@ -2,7 +2,6 @@ package id.ac.ui.cs.pustakaone.identity.service;
 
 import id.ac.ui.cs.pustakaone.identity.Enum.Role;
 import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationRequest;
-import id.ac.ui.cs.pustakaone.identity.dto.AuthenticationResponse;
 import id.ac.ui.cs.pustakaone.identity.dto.RegisterRequest;
 import id.ac.ui.cs.pustakaone.identity.model.User;
 import id.ac.ui.cs.pustakaone.identity.repository.UserRepository;
@@ -48,7 +47,7 @@ public class AuthenticationService {
         );
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
-;
+
         return user;
     }
 
