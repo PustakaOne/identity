@@ -27,6 +27,7 @@ public class SecurityConfiguration {
                     authorizeHttpRequest
                             .requestMatchers("/auth/**").permitAll()
                             .requestMatchers("/user/profiles").permitAll()
+                            .requestMatchers("/actuator/prometheus").permitAll()
                             .anyRequest().authenticated();
                 })
                 .sessionManagement((sessionManagement) -> {
